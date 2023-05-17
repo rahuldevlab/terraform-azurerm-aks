@@ -36,13 +36,13 @@ resource "azurerm_kubernetes_cluster" "main" {
   sku_tier                            = var.sku_tier
   tags                                = var.tags
   workload_identity_enabled           = var.workload_identity_enabled
+
   dynamic "api_server_access_profile" {
     for_each = var.public_network_access_enabled ? var.api_server_access_profile : []
     content {
         authorized_ip_ranges = api_server_access_profile.value.authorized_ip_ranges
       }
     }
-  }
 
   dynamic "default_node_pool" {
     for_each = var.enable_auto_scaling == true ? [] : ["default_node_pool_manually_scaled"]
@@ -448,10 +448,10 @@ resource "azurerm_kubernetes_cluster" "main" {
       condition     = !(var.kms_enabled && var.identity_type != "UserAssigned")
       error_message = "KMS etcd encryption doesn't work with system-assigned managed identity."
     }
-#     precondition {
-#       condition     = !var.public_network_access_enabled || try(contains(var.api_server_authorized_ip_ranges, "0.0.0.0/32"), false)
-#       error_message = "When `public_network_access_enabled` is set to true, `0.0.0.0/32` must be added to `authorized_ip_ranges` in the `api_server_access_profile block` (https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster#public_network_access_enabled)."
-#     }
+    # precondition {
+    #   condition     = !var.public_network_access_enabled || try(contains(var.api_server_authorized_ip_ranges, "0.0.0.0/32"), false)
+    #   error_message = "When `public_network_access_enabled` is set to true, `0.0.0.0/32` must be added to `authorized_ip_ranges` in the `api_server_access_profile block` (https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster#public_network_access_enabled)."
+    # }
   }
 }
 
