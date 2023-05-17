@@ -18,7 +18,6 @@ resource "azurerm_kubernetes_cluster" "main" {
   location                            = coalesce(var.location, data.azurerm_resource_group.main.location)
   name                                = var.cluster_name == null ? "${var.prefix}-aks" : var.cluster_name
   resource_group_name                 = data.azurerm_resource_group.main.name
-  api_server_authorized_ip_ranges     = var.api_server_authorized_ip_ranges
   automatic_channel_upgrade           = var.automatic_channel_upgrade
   azure_policy_enabled                = var.azure_policy_enabled
   disk_encryption_set_id              = var.disk_encryption_set_id
@@ -37,6 +36,13 @@ resource "azurerm_kubernetes_cluster" "main" {
   sku_tier                            = var.sku_tier
   tags                                = var.tags
   workload_identity_enabled           = var.workload_identity_enabled
+  dynamic "api_server_access_profile" {
+    for_each = var.public_network_access_enabled ? var.api_server_access_profile : []
+    content {
+        authorized_ip_ranges = api_server_access_profile.value.authorized_ip_ranges
+      }
+    }
+  }
 
   dynamic "default_node_pool" {
     for_each = var.enable_auto_scaling == true ? [] : ["default_node_pool_manually_scaled"]
