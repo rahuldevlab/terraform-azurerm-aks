@@ -1132,3 +1132,10 @@ variable "workload_identity_enabled" {
   default     = false
   description = "Enable or Disable Workload Identity. Defaults to false."
 }
+
+
+variable "api_server_access_profile" {
+  type = object({
+    authorized_ip_ranges = list(string)
+  })
+}
